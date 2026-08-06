@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Briefing de Demanda Criativa</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="form-shell">
+    <header class="form-header">
+      <h1 id="form-title">Briefing de Demanda Criativa</h1>
+      <p id="form-subtitle" class="form-subtitle">Preencha as informações abaixo para abrir uma solicitação para o time de design.</p>
+      <div class="progress-track">
+        <div id="progress-bar" class="progress-bar"></div>
+      </div>
+    </header>
+
+    <form id="demand-form" novalidate>
+
+      <!-- Etapa 1: Identificação -->
+      <section class="step" data-step="1">
+        <h2>Quem está solicitando?</h2>
+
+        <label class="field">
+          <span class="field-label">Qual o seu nome? <span class="req">*</span></span>
+          <input type="text" name="nome" placeholder="Nome e Sobrenome" required />
+        </label>
+
+        <fieldset class="field">
+          <legend class="field-label">Para qual empresa é a solicitação? <span class="req">*</span></legend>
+          <div class="choice-grid" data-name="empresa" data-type="radio">
+            <label class="choice-card">
+              <input type="radio" name="empresa" value="Grupo Softcomp" required />
+              <span>Grupo Softcomp</span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="empresa" value="Softcomp" />
+              <span>Softcomp</span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="empresa" value="Softdados" />
+              <span>Softdados</span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="empresa" value="SoftX" />
+              <span>SoftX</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <label class="field">
+          <span class="field-label">E-mail corporativo <span class="req">*</span></span>
+          <input type="email" name="email" placeholder="Insira seu e-mail" required />
+        </label>
+      </section>
+
+      <!-- Etapa 2: Tipo de demanda -->
+      <section class="step" data-step="2" hidden>
+        <h2>Qual o tipo de demanda?</h2>
+        <fieldset class="field">
+          <legend class="sr-only">Tipo de demanda</legend>
+          <div class="choice-grid" data-name="tipoDemanda" data-type="radio">
+            <label class="choice-card">
+              <input type="radio" name="tipoDemanda" value="redes_sociais" required />
+              <span>Post para redes sociais</span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="tipoDemanda" value="impresso" />
+              <span>Impresso</span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="tipoDemanda" value="site" />
+              <span>Material para site</span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="tipoDemanda" value="wallpaper" />
+              <span>Wallpaper</span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="tipoDemanda" value="campanha_sazonal" />
+              <span>Campanha sazonal</span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="tipoDemanda" value="campanha_vendas" />
+              <span>Campanha de vendas</span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="tipoDemanda" value="outro" />
+              <span>Outro</span>
+            </label>
+          </div>
+        </fieldset>
+      </section>
+
+      <!-- Etapa 3: Campos específicos do tipo escolhido (renderizada via JS) -->
+      <section class="step" data-step="3" hidden>
+        <h2 id="dynamic-step-title">Detalhes da demanda</h2>
+        <div id="dynamic-fields"></div>
+      </section>
+
+      <!-- Etapa 4: Prazo, prioridade, aprovação, anexos -->
+      <section class="step" data-step="4" hidden>
+        <h2>Prazo e aprovação</h2>
+
+        <label class="field">
+          <span class="field-label">Data de entrega desejada <span class="req">*</span></span>
+          <input type="date" name="prazoDesejado" required />
+        </label>
+
+        <fieldset class="field">
+          <legend class="field-label">Prioridade <span class="req">*</span></legend>
+          <div class="choice-grid three" data-name="prioridade" data-type="radio">
+            <label class="choice-card">
+              <input type="radio" name="prioridade" value="Normal" required />
+              <span>Normal <small>até 5 dias úteis</small></span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="prioridade" value="Prioritário" />
+              <span>Prioritário <small>até 2 dias úteis</small></span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="prioridade" value="Urgente" />
+              <span>Urgente <small>mesmo dia, sujeito à fila</small></span>
+            </label>
+          </div>
+        </fieldset>
+
+        <label class="field">
+          <span class="field-label">Quem vai aprovar a peça final?</span>
+          <input type="text" name="aprovador" placeholder="Nome do responsável pela aprovação" />
+        </label>
+
+        <label class="field">
+          <span class="field-label">Arquivos de referência (logos, imagens, briefing em PDF etc.)</span>
+          <input type="file" name="arquivos" multiple accept="image/*,.pdf,.ai,.psd,.doc,.docx" />
+          <small class="hint">Pode anexar mais de um arquivo. Para vídeos grandes, prefira colar um link abaixo.</small>
+        </label>
+
+        <div class="field">
+          <span class="field-label">Links de referência (opcional)</span>
+          <input type="url" name="link1" placeholder="Link da referência" class="link-input" />
+          <input type="url" name="link2" placeholder="Link da referência 02" class="link-input" />
+          <input type="url" name="link3" placeholder="Link da referência 03" class="link-input" />
+        </div>
+
+        <label class="field">
+          <span class="field-label">Observações adicionais</span>
+          <textarea name="observacoes" rows="3" placeholder="Alguma informação extra que o time de design precise saber?"></textarea>
+        </label>
+      </section>
+
+      <!-- Etapa 5: Confirmação -->
+      <section class="step" data-step="5" hidden>
+        <h2>Confira antes de enviar</h2>
+        <div id="review-summary" class="review-summary"></div>
+      </section>
+
+      <div class="form-nav">
+        <button type="button" id="btn-back" class="btn btn-ghost" hidden>← Voltar</button>
+        <button type="button" id="btn-next" class="btn btn-primary">Avançar →</button>
+        <button type="submit" id="btn-submit" class="btn btn-primary" hidden>Enviar solicitação</button>
+      </div>
+    </form>
+
+    <div id="success-screen" class="success-screen" hidden>
+      <div class="success-icon">✓</div>
+      <h2>Solicitação enviada!</h2>
+      <p>Seu protocolo é:</p>
+      <div id="protocol-code" class="protocol-code"></div>
+      <p class="success-note">Você vai receber um e-mail de confirmação com esses dados. Guarde o protocolo para acompanhar o andamento.</p>
+      <button type="button" id="btn-new" class="btn btn-primary">Enviar outra solicitação</button>
+    </div>
+
+    <div id="error-banner" class="error-banner" hidden></div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
