@@ -1,13 +1,14 @@
 /**
  * Backend do formulário de demanda criativa.
- * Recebe o POST do formulário (JSON), grava uma linha na planilha vinculada,
- * sobe os arquivos anexados para uma pasta no Drive e envia um e-mail de
- * confirmação com o número de protocolo.
+ * Recebe o POST do formulário (JSON), grava linha(s) na planilha do mês
+ * corrente, sobe os arquivos anexados para uma pasta no Drive, envia um
+ * e-mail de confirmação com o protocolo e o resumo completo da solicitação
+ * para o solicitante, e uma cópia completa para o time de design.
  *
  * Como instalar:
  * 1. Crie uma planilha no Google Sheets. Extensões > Apps Script.
  * 2. Cole este arquivo substituindo o Code.gs padrão.
- * 3. Ajuste CONFIG.SHEET_NAME e CONFIG.DRIVE_FOLDER_ID abaixo.
+ * 3. Ajuste CONFIG.DRIVE_FOLDER_ID abaixo.
  * 4. Implantar > Nova implantação > tipo "App da Web".
  *    - Executar como: Eu
  *    - Quem pode acessar: Qualquer pessoa
@@ -15,16 +16,16 @@
  */
 
 const CONFIG = {
-  SHEET_NAME: "Demandas",
   // ID da pasta do Google Drive onde os anexos serão salvos (crie uma pasta e pegue o ID pela URL).
   DRIVE_FOLDER_ID: "COLE_AQUI_O_ID_DA_PASTA_DO_DRIVE",
   PROTOCOL_PREFIX: "SC",
-  // E-mail(s) do time de design que devem ser avisados de novas demandas (separados por vírgula). Deixe vazio para não notificar.
-  NOTIFY_TEAM_EMAILS: "",
+  // E-mail(s) que recebem uma cópia completa de toda demanda recebida (separados por vírgula).
+  NOTIFY_TEAM_EMAILS: "rafael@souzdesign.com.br",
 };
 
 const HEADERS = [
   "Protocolo",
+  "Item",
   "Data/Hora",
   "Nome",
   "Empresa",
@@ -34,7 +35,7 @@ const HEADERS = [
   "Prazo Desejado",
   "Aprovador",
   "Status",
-  "Campos Específicos (JSON)",
+  "Detalhes do Item",
   "Links de Referência",
   "Arquivos (Drive)",
   "Observações",
@@ -45,33 +46,37 @@ function doPost(e) {
     const payload = JSON.parse(e.postData.contents);
     validatePayload(payload);
 
-    const sheet = getSheet();
+    const sheet = getMonthlySheet();
     const protocolo = generateProtocol(sheet);
     const arquivosUrls = uploadFiles(payload.arquivos || [], protocolo);
+    const itens = buildItens(payload);
 
-    sheet.appendRow([
-      protocolo,
-      new Date(),
-      payload.nome || "",
-      payload.empresa || "",
-      payload.email || "",
-      payload.tipoDemandaLabel || payload.tipoDemanda || "",
-      payload.prioridade || "",
-      payload.prazoDesejado || "",
-      payload.aprovador || "",
-      "Recebido",
-      JSON.stringify(payload.camposEspecificos || {}, null, 0),
-      (payload.links || []).join(", "),
-      arquivosUrls.join(", "),
-      payload.observacoes || "",
-    ]);
+    itens.forEach((item) => {
+      sheet.appendRow([
+        protocolo,
+        item.itemLabel,
+        new Date(),
+        payload.nome || "",
+        payload.empresa || "",
+        payload.email || "",
+        payload.tipoDemandaLabel || payload.tipoDemanda || "",
+        payload.prioridade || "",
+        payload.prazoDesejado || "",
+        payload.aprovador || "",
+        "Recebido",
+        item.resumoText,
+        (payload.links || []).join(", "),
+        arquivosUrls.join(", "),
+        payload.observacoes || "",
+      ]);
+    });
+
+    const resumo = buildResumoCompleto(payload, itens, arquivosUrls, protocolo);
 
     if (payload.email) {
-      sendConfirmationEmail(payload, protocolo);
+      sendConfirmationEmail(payload, protocolo, resumo);
     }
-    if (CONFIG.NOTIFY_TEAM_EMAILS) {
-      notifyTeam(payload, protocolo);
-    }
+    sendTeamNotification(payload, protocolo, resumo);
 
     return jsonResponse({ ok: true, protocolo: protocolo });
   } catch (err) {
@@ -92,13 +97,15 @@ function validatePayload(payload) {
   }
 }
 
-function getSheet() {
+// ---- Planilha mensal ------------------------------------------------------
+
+function getMonthlySheet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let sheet = ss.getSheetByName(CONFIG.SHEET_NAME);
+  const tz = Session.getScriptTimeZone() || "America/Sao_Paulo";
+  const tabName = "Demandas " + Utilities.formatDate(new Date(), tz, "yyyy-MM");
+  let sheet = ss.getSheetByName(tabName);
   if (!sheet) {
-    sheet = ss.insertSheet(CONFIG.SHEET_NAME);
-  }
-  if (sheet.getLastRow() === 0) {
+    sheet = ss.insertSheet(tabName);
     sheet.appendRow(HEADERS);
     sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight("bold");
     sheet.setFrozenRows(1);
@@ -107,11 +114,77 @@ function getSheet() {
 }
 
 function generateProtocol(sheet) {
-  const year = new Date().getFullYear();
+  const tz = Session.getScriptTimeZone() || "America/Sao_Paulo";
+  const ym = Utilities.formatDate(new Date(), tz, "yyyy-MM");
   const seq = Math.max(sheet.getLastRow(), 1); // linha 1 é o header
   const padded = String(seq).padStart(4, "0");
-  return `${CONFIG.PROTOCOL_PREFIX}-${year}-${padded}`;
+  return `${CONFIG.PROTOCOL_PREFIX}-${ym}-${padded}`;
 }
+
+// ---- Itens da solicitação (1 por criativo, ou geral + 1 por peça de campanha) --
+
+function formatCampos(list) {
+  if (!list || !list.length) return "";
+  return list.map((item) => `${item.label}: ${item.value}`).join("\n");
+}
+
+function buildItens(payload) {
+  if (payload.criativos && payload.criativos.length) {
+    const total = payload.criativos.length;
+    return payload.criativos.map((c, i) => ({
+      itemLabel: total > 1 ? `Criativo ${i + 1} de ${total}` : "Criativo único",
+      resumoText: formatCampos(c.camposEspecificos),
+    }));
+  }
+
+  const itens = [
+    {
+      itemLabel: payload.pecas && payload.pecas.length ? "Campanha (dados gerais)" : "Único item",
+      resumoText: formatCampos(payload.camposEspecificos),
+    },
+  ];
+  if (payload.pecas && payload.pecas.length) {
+    payload.pecas.forEach((p) => {
+      itens.push({ itemLabel: `Peça — ${p.peca}`, resumoText: formatCampos(p.camposEspecificos) });
+    });
+  }
+  return itens;
+}
+
+function buildResumoCompleto(payload, itens, arquivosUrls, protocolo) {
+  const linhas = [];
+  linhas.push(`Protocolo: ${protocolo}`);
+  linhas.push(`Solicitante: ${payload.nome} <${payload.email}>`);
+  linhas.push(`Empresa: ${payload.empresa}`);
+  linhas.push(`Tipo de demanda: ${payload.tipoDemandaLabel || payload.tipoDemanda}`);
+  linhas.push(`Prioridade: ${payload.prioridade}`);
+  linhas.push(`Prazo desejado: ${payload.prazoDesejado}`);
+  linhas.push(`Aprovador: ${payload.aprovador || "—"}`);
+  linhas.push("");
+
+  itens.forEach((item) => {
+    linhas.push(`— ${item.itemLabel} —`);
+    linhas.push(item.resumoText || "(sem detalhes)");
+    linhas.push("");
+  });
+
+  if (payload.links && payload.links.length) {
+    linhas.push("Links de referência:");
+    payload.links.forEach((l) => linhas.push(`- ${l}`));
+    linhas.push("");
+  }
+  if (arquivosUrls && arquivosUrls.length) {
+    linhas.push("Arquivos anexados:");
+    arquivosUrls.forEach((u) => linhas.push(`- ${u}`));
+    linhas.push("");
+  }
+  if (payload.observacoes) {
+    linhas.push(`Observações: ${payload.observacoes}`);
+  }
+  return linhas.join("\n");
+}
+
+// ---- Arquivos ---------------------------------------------------------
 
 function uploadFiles(arquivos, protocolo) {
   if (!arquivos.length || CONFIG.DRIVE_FOLDER_ID === "COLE_AQUI_O_ID_DA_PASTA_DO_DRIVE") {
@@ -128,35 +201,24 @@ function uploadFiles(arquivos, protocolo) {
   });
 }
 
-function sendConfirmationEmail(payload, protocolo) {
+// ---- E-mails ------------------------------------------------------------
+
+function sendConfirmationEmail(payload, protocolo, resumo) {
   const subject = `Demanda recebida — protocolo ${protocolo}`;
   const body = [
     `Olá, ${payload.nome}!`,
     "",
-    `Sua solicitação foi recebida com sucesso. Protocolo: ${protocolo}`,
-    `Tipo de demanda: ${payload.tipoDemandaLabel || payload.tipoDemanda}`,
-    `Empresa: ${payload.empresa}`,
-    `Prazo desejado: ${payload.prazoDesejado}`,
-    `Prioridade: ${payload.prioridade}`,
+    "Sua solicitação foi recebida com sucesso. Guarde o protocolo abaixo para acompanhar o andamento.",
     "",
-    "Guarde este protocolo para acompanhar o andamento da sua demanda.",
+    resumo,
   ].join("\n");
   MailApp.sendEmail(payload.email, subject, body);
 }
 
-function notifyTeam(payload, protocolo) {
-  const recipients = CONFIG.NOTIFY_TEAM_EMAILS;
+function sendTeamNotification(payload, protocolo, resumo) {
+  if (!CONFIG.NOTIFY_TEAM_EMAILS) return;
   const subject = `Nova demanda: ${protocolo} — ${payload.tipoDemandaLabel || payload.tipoDemanda}`;
-  const body = [
-    `Nova solicitação recebida.`,
-    `Protocolo: ${protocolo}`,
-    `Solicitante: ${payload.nome} (${payload.email})`,
-    `Empresa: ${payload.empresa}`,
-    `Tipo: ${payload.tipoDemandaLabel || payload.tipoDemanda}`,
-    `Prioridade: ${payload.prioridade}`,
-    `Prazo desejado: ${payload.prazoDesejado}`,
-  ].join("\n");
-  MailApp.sendEmail(recipients, subject, body);
+  MailApp.sendEmail(CONFIG.NOTIFY_TEAM_EMAILS, subject, resumo);
 }
 
 function jsonResponse(obj) {

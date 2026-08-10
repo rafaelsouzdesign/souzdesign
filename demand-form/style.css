@@ -165,6 +165,55 @@ fieldset.field {
   color: var(--text-muted);
 }
 
+.creative-block {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  background: #fafafa;
+}
+
+.creative-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.creative-block-header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.btn-remove-creative {
+  background: transparent;
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.btn-add-creative {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: 1px dashed var(--brand-accent);
+  color: var(--brand-accent);
+  border-radius: 10px;
+  padding: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.peca-detalhe-block h3 {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
 .form-nav {
   display: flex;
   justify-content: space-between;

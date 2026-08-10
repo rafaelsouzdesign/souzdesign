@@ -50,6 +50,10 @@
               <input type="radio" name="empresa" value="SoftX" />
               <span>SoftX</span>
             </label>
+            <label class="choice-card">
+              <input type="radio" name="empresa" value="Viva+" />
+              <span>Viva+</span>
+            </label>
           </div>
         </fieldset>
 
@@ -350,6 +354,55 @@
     color: var(--sd-text-muted);
   }
 
+  #sd-demand-form .creative-block {
+    border: 1px solid var(--sd-border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    background: #fafafa;
+  }
+
+  #sd-demand-form .creative-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  #sd-demand-form .creative-block-header h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  #sd-demand-form .btn-remove-creative {
+    background: transparent;
+    border: 1px solid var(--sd-danger);
+    color: var(--sd-danger);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.82rem;
+    cursor: pointer;
+  }
+
+  #sd-demand-form .btn-add-creative {
+    display: block;
+    width: 100%;
+    background: transparent;
+    border: 1px dashed var(--sd-brand-accent);
+    color: var(--sd-brand-accent);
+    border-radius: 10px;
+    padding: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+
+  #sd-demand-form .peca-detalhe-block h3 {
+    margin: 0 0 12px;
+    font-size: 0.9rem;
+    color: var(--sd-text-muted);
+  }
+
   #sd-demand-form .form-nav {
     display: flex;
     justify-content: space-between;
@@ -462,37 +515,75 @@
   };
   // -----------------------------------------------------------------------
 
+  function slugify(str) {
+    return String(str)
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(new RegExp("[\\u0300-\\u036f]", "g"), "")
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "");
+  }
+
+  // ---- Redes sociais: campos de cada "criativo" (repetível) -------------
+  const REDES_SOCIAIS_FIELDS = [
+    { id: "redeSocial", label: "Qual(is) rede(s) social(is)?", type: "checkbox", required: true,
+      options: ["Instagram", "LinkedIn", "TikTok", "WhatsApp"] },
+    { id: "formato", label: "Qual(is) formato(s)?", type: "checkbox", required: true,
+      options: ["Feed (1350x1080p)", "Story (1920x1080p)", "Carrossel", "Reels/Vídeo"] },
+    { id: "objetivo", label: "Qual o objetivo do post?", type: "radio", required: true,
+      options: ["Informar", "Vender", "Promover", "Engajar", "Comemorar", "Parabenizar", "Outro"] },
+    { id: "tituloPrincipal", label: "Título principal", type: "text", required: true },
+    { id: "copy", label: "Qual o texto (copy) definido?", type: "textarea", required: true },
+  ];
+
+  const MAX_CREATIVES = 30;
+
+  // ---- Campanhas: campos gerais + detalhamento por peça envolvida -------
+  const PECAS_OPTIONS = ["Post redes sociais", "Impresso", "Material para site", "Wallpaper", "E-mail marketing", "Outro"];
+
+  const PECA_DETAIL_FIELDS = {
+    "Post redes sociais": [
+      { id: "redeSocial", label: "Qual(is) rede(s) social(is)?", type: "checkbox", required: true,
+        options: ["Instagram", "LinkedIn", "TikTok", "WhatsApp"] },
+      { id: "formato", label: "Qual(is) formato(s)?", type: "checkbox", required: true,
+        options: ["Feed (1350x1080p)", "Story (1920x1080p)", "Carrossel", "Reels/Vídeo"] },
+      { id: "detalhes", label: "Detalhes desta peça", type: "textarea", required: false },
+    ],
+    "Impresso": [
+      { id: "dimensaoImpresso", label: "Dimensão do impresso", type: "text", required: true },
+      { id: "detalhes", label: "Detalhes desta peça", type: "textarea", required: false },
+    ],
+    "Material para site": [
+      { id: "detalhes", label: "Detalhes desta peça", type: "textarea", required: false },
+    ],
+    "Wallpaper": [
+      { id: "detalhes", label: "Detalhes desta peça", type: "textarea", required: false },
+    ],
+    "E-mail marketing": [
+      { id: "detalhes", label: "Detalhes desta peça", type: "textarea", required: false },
+    ],
+    "Outro": [
+      { id: "detalhes", label: "Detalhes desta peça", type: "textarea", required: true },
+    ],
+  };
+
   function campaignSchema() {
     return {
       title: "Detalhes da campanha",
       fields: [
         { id: "nomeCampanha", label: "Nome da campanha", type: "text", required: true },
-        { id: "pecasEnvolvidas", label: "Peças envolvidas", type: "checkbox", required: true,
-          options: ["Post redes sociais", "Impresso", "Material para site", "Wallpaper", "E-mail marketing", "Outro"] },
+        { id: "headline", label: "Headline da campanha (chamada que será utilizada em toda a campanha)", type: "text", required: true },
+        { id: "pecasEnvolvidas", label: "Peças envolvidas", type: "checkbox", required: true, options: PECAS_OPTIONS },
         { id: "canais", label: "Canais de veiculação", type: "checkbox", required: true,
           options: ["Instagram", "LinkedIn", "TikTok", "WhatsApp", "E-mail", "Site", "Impresso"] },
         { id: "dataInicio", label: "Data de início da veiculação", type: "date", required: true },
         { id: "dataFim", label: "Data de fim da veiculação", type: "date", required: false },
-        { id: "orcamentoMidia", label: "Orçamento de mídia (se houver)", type: "text", required: false },
         { id: "briefingGeral", label: "Briefing geral da campanha", type: "textarea", required: true },
       ],
     };
   }
 
   const SCHEMAS = {
-    redes_sociais: {
-      title: "Detalhes do post para redes sociais",
-      fields: [
-        { id: "redeSocial", label: "Qual(is) rede(s) social(is)?", type: "checkbox", required: true,
-          options: ["Instagram", "LinkedIn", "TikTok", "WhatsApp"] },
-        { id: "formato", label: "Qual(is) formato(s)?", type: "checkbox", required: true,
-          options: ["Feed (1350x1080p)", "Story (1920x1080p)", "Carrossel", "Reels/Vídeo"] },
-        { id: "objetivo", label: "Qual o objetivo do post?", type: "radio", required: true,
-          options: ["Informar", "Vender", "Promover", "Engajar", "Comemorar", "Parabenizar", "Outro"] },
-        { id: "tituloPrincipal", label: "Título principal", type: "text", required: true },
-        { id: "copy", label: "Qual o texto (copy) definido?", type: "textarea", required: true },
-      ],
-    },
     impresso: {
       title: "Detalhes do material impresso",
       fields: [
@@ -549,6 +640,9 @@
   const MAX_STEP = 5;
   let currentStep = 1;
   let selectedFiles = [];
+  let lastRenderedTipo = null;
+  let creativeIndices = [1];
+  let nextCreativeIndex = 2;
 
   const root = document.getElementById("sd-demand-form");
   const form = root.querySelector("#demand-form");
@@ -634,19 +728,25 @@
     return "";
   }
 
-  function carrosselCardsHtml() {
-    let html = '<div id="carrossel-cards" hidden><h3 class="field-label" style="margin-bottom:10px">Cards do carrossel</h3>';
+  function prefixFields(fields, prefix) {
+    return fields.map((f) => Object.assign({}, f, { id: `${prefix}_${f.id}` }));
+  }
+
+  // ---- Redes sociais: múltiplos criativos --------------------------------
+
+  function carrosselCardsHtml(prefix) {
+    let html = `<div id="carrossel-cards-${prefix}" class="carrossel-cards" hidden><h3 class="field-label" style="margin-bottom:10px">Cards do carrossel</h3>`;
     for (let i = 1; i <= 6; i++) {
       html += `
         <div class="card-block">
           <h3>Card 0${i}</h3>
           <label class="field">
             <span class="field-label">Título</span>
-            <input type="text" name="card${i}Titulo" />
+            <input type="text" name="${prefix}_card${i}Titulo" />
           </label>
           <label class="field">
             <span class="field-label">Subtítulo</span>
-            <textarea name="card${i}Subtitulo" rows="2"></textarea>
+            <textarea name="${prefix}_card${i}Subtitulo" rows="2"></textarea>
           </label>
         </div>`;
     }
@@ -654,7 +754,104 @@
     return html;
   }
 
+  function creativeBlockHtml(index) {
+    const prefix = `criativo${index}`;
+    const fields = prefixFields(REDES_SOCIAIS_FIELDS, prefix);
+    let html = `<div class="creative-block" data-index="${index}">`;
+    html += `<div class="creative-block-header"><h3>Criativo ${index}</h3><button type="button" class="btn-remove-creative" data-index="${index}">Remover</button></div>`;
+    html += fields.map(fieldHtml).join("");
+    html += carrosselCardsHtml(prefix);
+    html += "</div>";
+    return html;
+  }
+
+  function wireCreativeBlock(index) {
+    const block = dynamicFieldsEl.querySelector(`.creative-block[data-index="${index}"]`);
+    block.querySelector(".btn-remove-creative").addEventListener("click", () => removeCreativeBlock(index));
+    const formatoBoxes = block.querySelectorAll(`input[name="criativo${index}_formato[]"]`);
+    const cardsBlock = block.querySelector(`#carrossel-cards-criativo${index}`);
+    const toggleCards = () => {
+      const hasCarrossel = Array.from(formatoBoxes).some((cb) => cb.checked && cb.value === "Carrossel");
+      cardsBlock.hidden = !hasCarrossel;
+    };
+    formatoBoxes.forEach((cb) => cb.addEventListener("change", toggleCards));
+  }
+
+  function updateCreativeControls() {
+    const blocks = dynamicFieldsEl.querySelectorAll(".creative-block");
+    blocks.forEach((block, i) => {
+      block.querySelector(".creative-block-header h3").textContent = `Criativo ${i + 1}`;
+      block.querySelector(".btn-remove-creative").hidden = blocks.length <= 1;
+    });
+    const addBtn = root.querySelector("#btn-add-creative");
+    if (addBtn) addBtn.hidden = blocks.length >= MAX_CREATIVES;
+  }
+
+  function addCreativeBlock() {
+    if (creativeIndices.length >= MAX_CREATIVES) return;
+    const index = nextCreativeIndex++;
+    creativeIndices.push(index);
+    const container = root.querySelector("#creatives-container");
+    container.insertAdjacentHTML("beforeend", creativeBlockHtml(index));
+    wireCreativeBlock(index);
+    updateCreativeControls();
+  }
+
+  function removeCreativeBlock(index) {
+    const block = dynamicFieldsEl.querySelector(`.creative-block[data-index="${index}"]`);
+    if (block) block.remove();
+    creativeIndices = creativeIndices.filter((i) => i !== index);
+    updateCreativeControls();
+  }
+
+  function renderCreativesUI() {
+    dynamicTitleEl.textContent = "Detalhes do post para redes sociais";
+    creativeIndices = [1];
+    nextCreativeIndex = 2;
+    let html = '<div id="creatives-container">' + creativeBlockHtml(1) + "</div>";
+    html += '<button type="button" id="btn-add-creative" class="btn-add-creative">+ Adicionar outro criativo/carrossel</button>';
+    dynamicFieldsEl.innerHTML = html;
+    wireCreativeBlock(1);
+    root.querySelector("#btn-add-creative").addEventListener("click", addCreativeBlock);
+    updateCreativeControls();
+  }
+
+  // ---- Campanhas: detalhamento por peça envolvida ------------------------
+
+  function pecasDetalheContainerHtml() {
+    let html = '<div id="pecas-detalhe-container">';
+    PECAS_OPTIONS.forEach((peca) => {
+      const slug = slugify(peca);
+      const fieldsMeta = prefixFields(PECA_DETAIL_FIELDS[peca] || [], `pecaDetalhe_${slug}`).map((f) =>
+        Object.assign({}, f, { required: false })
+      );
+      html += `<div class="peca-detalhe-block card-block" data-peca-slug="${slug}" hidden>`;
+      html += `<h3>Detalhes — ${peca}</h3>`;
+      html += fieldsMeta.map(fieldHtml).join("");
+      html += "</div>";
+    });
+    html += "</div>";
+    return html;
+  }
+
+  function wirePecasDetalheToggle() {
+    const boxes = dynamicFieldsEl.querySelectorAll('input[name="pecasEnvolvidas[]"]');
+    const sync = () => {
+      boxes.forEach((cb) => {
+        const slug = slugify(cb.value);
+        const block = dynamicFieldsEl.querySelector(`.peca-detalhe-block[data-peca-slug="${slug}"]`);
+        if (block) block.hidden = !cb.checked;
+      });
+    };
+    boxes.forEach((cb) => cb.addEventListener("change", sync));
+    sync();
+  }
+
   function renderDynamicFields(tipo) {
+    if (tipo === "redes_sociais") {
+      renderCreativesUI();
+      return;
+    }
     const schema = SCHEMAS[tipo];
     if (!schema) {
       dynamicFieldsEl.innerHTML = "";
@@ -662,19 +859,13 @@
     }
     dynamicTitleEl.textContent = schema.title;
     let html = schema.fields.map(fieldHtml).join("");
-    if (tipo === "redes_sociais") {
-      html += carrosselCardsHtml();
+    const isCampanha = tipo === "campanha_sazonal" || tipo === "campanha_vendas";
+    if (isCampanha) {
+      html += pecasDetalheContainerHtml();
     }
     dynamicFieldsEl.innerHTML = html;
-
-    if (tipo === "redes_sociais") {
-      const formatoBoxes = dynamicFieldsEl.querySelectorAll('input[name="formato[]"]');
-      const cardsBlock = root.querySelector("#carrossel-cards");
-      const toggleCards = () => {
-        const hasCarrossel = Array.from(formatoBoxes).some((cb) => cb.checked && cb.value === "Carrossel");
-        cardsBlock.hidden = !hasCarrossel;
-      };
-      formatoBoxes.forEach((cb) => cb.addEventListener("change", toggleCards));
+    if (isCampanha) {
+      wirePecasDetalheToggle();
     }
   }
 
@@ -692,7 +883,11 @@
 
     if (step === 3) {
       const tipo = form.querySelector('input[name="tipoDemanda"]:checked');
-      renderDynamicFields(tipo ? tipo.value : null);
+      const tipoValue = tipo ? tipo.value : null;
+      if (tipoValue !== lastRenderedTipo) {
+        renderDynamicFields(tipoValue);
+        lastRenderedTipo = tipoValue;
+      }
     }
     if (step === 5) {
       renderReview();
@@ -730,17 +925,59 @@
         return false;
       }
     }
-    // grupos de checkbox marcados como obrigatórios via schema (etapa 3)
+
     if (step === 3) {
       const tipo = form.querySelector('input[name="tipoDemanda"]:checked');
-      const schema = tipo && SCHEMAS[tipo.value];
-      if (schema) {
-        for (const field of schema.fields) {
-          if (field.type === "checkbox" && field.required) {
-            const checked = el.querySelectorAll(`input[name="${field.id}[]"]:checked`);
+      if (tipo && tipo.value === "redes_sociais") {
+        const blocks = el.querySelectorAll(".creative-block");
+        for (const block of blocks) {
+          const index = block.dataset.index;
+          const label = block.querySelector(".creative-block-header h3").textContent;
+          for (const groupId of ["redeSocial", "formato"]) {
+            const checked = block.querySelectorAll(`input[name="criativo${index}_${groupId}[]"]:checked`);
             if (checked.length === 0) {
-              showError(`Selecione ao menos uma opção em "${field.label}"`);
+              const groupLabel = groupId === "redeSocial" ? "rede social" : "formato";
+              showError(`Selecione ao menos um(a) ${groupLabel} no ${label}`);
               return false;
+            }
+          }
+        }
+      } else if (tipo) {
+        const schema = SCHEMAS[tipo.value];
+        if (schema) {
+          for (const field of schema.fields) {
+            if (field.type === "checkbox" && field.required) {
+              const checked = el.querySelectorAll(`input[name="${field.id}[]"]:checked`);
+              if (checked.length === 0) {
+                showError(`Selecione ao menos uma opção em "${field.label}"`);
+                return false;
+              }
+            }
+          }
+        }
+        if (tipo.value === "campanha_sazonal" || tipo.value === "campanha_vendas") {
+          const checkedPecas = el.querySelectorAll('input[name="pecasEnvolvidas[]"]:checked');
+          for (const cb of checkedPecas) {
+            const peca = cb.value;
+            const slug = slugify(peca);
+            const fieldsMeta = PECA_DETAIL_FIELDS[peca] || [];
+            const block = el.querySelector(`.peca-detalhe-block[data-peca-slug="${slug}"]`);
+            for (const f of fieldsMeta) {
+              if (!f.required) continue;
+              const name = `pecaDetalhe_${slug}_${f.id}`;
+              if (f.type === "checkbox") {
+                const checked2 = block.querySelectorAll(`input[name="${name}[]"]:checked`);
+                if (checked2.length === 0) {
+                  showError(`Selecione ao menos uma opção em "${f.label}" (Detalhes — ${peca})`);
+                  return false;
+                }
+              } else {
+                const input2 = block.querySelector(`[name="${name}"]`);
+                if (!input2 || !input2.value.trim()) {
+                  showError(`Preencha "${f.label}" em Detalhes — ${peca}`);
+                  return false;
+                }
+              }
             }
           }
         }
@@ -757,19 +994,25 @@
 
   function renderReview() {
     const data = collectAllData();
+    const tipo = data.tipoDemanda;
+    let itensCount = 1;
+    if (tipo === "redes_sociais") {
+      itensCount = dynamicFieldsEl.querySelectorAll(".creative-block").length;
+    } else if (tipo === "campanha_sazonal" || tipo === "campanha_vendas") {
+      itensCount = 1 + (data.pecasEnvolvidas ? data.pecasEnvolvidas.length : 0);
+    }
     const rows = [
       ["Nome", data.nome],
       ["Empresa", data.empresa],
       ["E-mail", data.email],
       ["Tipo de demanda", TIPO_LABELS[data.tipoDemanda] || data.tipoDemanda],
+      ["Itens nesta solicitação", String(itensCount)],
       ["Prazo desejado", data.prazoDesejado],
       ["Prioridade", data.prioridade],
       ["Aprovador", data.aprovador || "—"],
       ["Arquivos anexados", selectedFiles.length ? `${selectedFiles.length} arquivo(s)` : "Nenhum"],
     ];
-    const dl = rows
-      .map(([k, v]) => `<dt>${k}</dt><dd>${v || "—"}</dd>`)
-      .join("");
+    const dl = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v || "—"}</dd>`).join("");
     root.querySelector("#review-summary").innerHTML = `<dl>${dl}</dl>`;
   }
 
@@ -790,21 +1033,80 @@
 
   function buildCamposEspecificos(tipo, data) {
     const schema = SCHEMAS[tipo];
-    const out = {};
-    if (!schema) return out;
-    for (const field of schema.fields) {
-      out[field.id] = data[field.id] || (field.type === "checkbox" ? [] : "");
-    }
-    if (tipo === "redes_sociais") {
-      const cards = [];
-      for (let i = 1; i <= 6; i++) {
-        const titulo = data[`card${i}Titulo`];
-        const subtitulo = data[`card${i}Subtitulo`];
-        if (titulo || subtitulo) cards.push({ titulo: titulo || "", subtitulo: subtitulo || "" });
+    if (!schema) return [];
+    return schema.fields.map((field) => {
+      let value;
+      if (field.type === "checkbox") {
+        const arr = data[field.id] || [];
+        value = arr.length ? arr.join(", ") : "—";
+      } else {
+        value = (data[field.id] || "").toString().trim() || "—";
       }
-      if (cards.length) out.cardsCarrossel = cards;
-    }
-    return out;
+      return { label: field.label, value };
+    });
+  }
+
+  function buildCriativos(data) {
+    const indices = new Set();
+    Object.keys(data).forEach((k) => {
+      const m = k.match(/^criativo(\d+)_/);
+      if (m) indices.add(Number(m[1]));
+    });
+    const sorted = Array.from(indices).sort((a, b) => a - b);
+    return sorted.map((idx) => {
+      const prefix = `criativo${idx}`;
+      const campos = REDES_SOCIAIS_FIELDS.map((f) => {
+        const key = `${prefix}_${f.id}`;
+        let value;
+        if (f.type === "checkbox") {
+          const arr = data[key] || [];
+          value = arr.length ? arr.join(", ") : "—";
+        } else {
+          value = (data[key] || "").toString().trim() || "—";
+        }
+        return { label: f.label, value };
+      });
+      for (let i = 1; i <= 6; i++) {
+        const titulo = data[`${prefix}_card${i}Titulo`];
+        const subtitulo = data[`${prefix}_card${i}Subtitulo`];
+        if (titulo || subtitulo) {
+          campos.push({ label: `Card 0${i}`, value: `Título: ${titulo || "—"} | Subtítulo: ${subtitulo || "—"}` });
+        }
+      }
+      return { camposEspecificos: campos };
+    });
+  }
+
+  function buildCampanha(tipo, data) {
+    const schema = SCHEMAS[tipo];
+    const camposEspecificos = schema.fields.map((f) => {
+      let value;
+      if (f.type === "checkbox") {
+        const arr = data[f.id] || [];
+        value = arr.length ? arr.join(", ") : "—";
+      } else {
+        value = (data[f.id] || "").toString().trim() || "—";
+      }
+      return { label: f.label, value };
+    });
+    const pecasSelecionadas = data.pecasEnvolvidas || [];
+    const pecas = pecasSelecionadas.map((peca) => {
+      const slug = slugify(peca);
+      const fieldsMeta = PECA_DETAIL_FIELDS[peca] || [];
+      const campos = fieldsMeta.map((f) => {
+        const key = `pecaDetalhe_${slug}_${f.id}`;
+        let value;
+        if (f.type === "checkbox") {
+          const arr = data[key] || [];
+          value = arr.length ? arr.join(", ") : "—";
+        } else {
+          value = (data[key] || "").toString().trim() || "—";
+        }
+        return { label: f.label, value };
+      });
+      return { peca, camposEspecificos: campos };
+    });
+    return { camposEspecificos, pecas };
   }
 
   function fileToBase64(file) {
@@ -826,13 +1128,12 @@
         base64: await fileToBase64(file),
       }))
     );
-    return {
+    const payload = {
       nome: data.nome,
       empresa: data.empresa,
       email: data.email,
       tipoDemanda: data.tipoDemanda,
       tipoDemandaLabel: TIPO_LABELS[data.tipoDemanda] || data.tipoDemanda,
-      camposEspecificos: buildCamposEspecificos(data.tipoDemanda, data),
       prazoDesejado: data.prazoDesejado,
       prioridade: data.prioridade,
       aprovador: data.aprovador || "",
@@ -840,6 +1141,18 @@
       observacoes: data.observacoes || "",
       arquivos,
     };
+
+    if (data.tipoDemanda === "redes_sociais") {
+      payload.criativos = buildCriativos(data);
+    } else if (data.tipoDemanda === "campanha_sazonal" || data.tipoDemanda === "campanha_vendas") {
+      const campanha = buildCampanha(data.tipoDemanda, data);
+      payload.camposEspecificos = campanha.camposEspecificos;
+      payload.pecas = campanha.pecas;
+    } else {
+      payload.camposEspecificos = buildCamposEspecificos(data.tipoDemanda, data);
+    }
+
+    return payload;
   }
 
   function showSuccess(protocolo) {

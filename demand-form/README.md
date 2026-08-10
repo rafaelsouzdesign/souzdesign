@@ -28,7 +28,7 @@ demand-form/
 3. Apague o conteúdo padrão de `Code.gs` e cole o conteúdo de `apps-script/Code.gs` deste projeto.
 4. No topo do arquivo, ajuste `CONFIG`:
    - `DRIVE_FOLDER_ID`: crie uma pasta no Google Drive para os anexos e cole o ID (está na URL da pasta).
-   - `NOTIFY_TEAM_EMAILS`: e-mail(s) do time de design que devem ser avisados a cada nova demanda (opcional).
+   - `NOTIFY_TEAM_EMAILS`: já vem com `rafael@souzdesign.com.br` — troque ou adicione outros e-mails separados por vírgula se quiser que mais pessoas recebam cópia de toda demanda.
 5. **Implantar > Nova implantação**:
    - Tipo: **App da Web**
    - Executar como: **Eu**
@@ -67,11 +67,26 @@ Detalhes importantes dessa versão:
 - Para trocar as cores da marca, edite as variáveis no topo do bloco `<style>`
   (`--sd-brand`, `--sd-brand-accent` etc.).
 
-## Estrutura da planilha (aba "Demandas")
+## Notificações por e-mail
+
+Toda solicitação enviada dispara dois e-mails com o **resumo completo** (protocolo,
+dados do solicitante, todos os campos preenchidos — inclusive cada criativo ou
+cada peça de campanha —, links e arquivos anexados):
+
+- **Para o solicitante**, no e-mail que ele informou no passo 1 (confirmação com protocolo).
+- **Para o time de design**, em `CONFIG.NOTIFY_TEAM_EMAILS` no `Code.gs` (por padrão `rafael@souzdesign.com.br`).
+
+## Estrutura da planilha (uma aba por mês)
+
+Cada demanda cai numa aba nomeada pelo mês de envio, ex: **"Demandas 2026-08"** —
+criada automaticamente na primeira solicitação daquele mês. Assim a planilha
+fica organizada mês a mês e pode ser exportada como Excel (Arquivo > Fazer
+download > Microsoft Excel) a qualquer momento, aba por aba.
 
 | Coluna | Descrição |
 |---|---|
-| Protocolo | Gerado automaticamente, ex: `SC-2026-0001` |
+| Protocolo | Gerado automaticamente, ex: `SC-2026-08-0001` (mesmo protocolo para todas as linhas de uma mesma solicitação) |
+| Item | Qual item da solicitação essa linha representa — ver abaixo |
 | Data/Hora | Timestamp do envio |
 | Nome / Empresa / E-mail | Identificação do solicitante |
 | Tipo de Demanda | Post redes sociais, Impresso, Site, Wallpaper, Campanha sazonal/vendas, Outro |
@@ -79,20 +94,47 @@ Detalhes importantes dessa versão:
 | Prazo Desejado | Data escolhida pelo solicitante |
 | Aprovador | Quem valida a peça final |
 | **Status** | Coluna livre para o time atualizar manualmente: Recebido / Em produção / Em aprovação / Concluído — é aqui que a planilha vira o quadro de gestão |
-| Campos Específicos (JSON) | Todos os campos do tipo de demanda escolhido, em JSON |
+| Detalhes do Item | Todos os campos preenchidos para aquele item, um por linha de texto |
 | Links de Referência | Links colados pelo solicitante |
 | Arquivos (Drive) | URLs dos arquivos enviados, já salvos na pasta do protocolo |
 | Observações | Texto livre |
 
+**Uma solicitação pode gerar mais de uma linha**, sempre com o mesmo Protocolo:
+- Impresso, Site, Wallpaper, Outro → 1 linha ("Único item").
+- Post para redes sociais → 1 linha por criativo adicionado ("Criativo 1 de 3", "Criativo 2 de 3"...).
+- Campanha sazonal/de vendas → 1 linha com os dados gerais da campanha ("Campanha (dados gerais)") + 1 linha por peça envolvida marcada ("Peça — Impresso", "Peça — Post redes sociais"...).
+
+## Redes sociais: múltiplos criativos numa única solicitação
+
+No tipo "Post para redes sociais", o solicitante pode clicar em **"+ Adicionar
+outro criativo/carrossel"** quantas vezes precisar (até 30) para pedir vários
+criativos de uma vez, sem reabrir o formulário — cada um com sua própria rede
+social, formato, objetivo, copy e cards de carrossel. Cada criativo é validado
+e enviado como um item independente da mesma solicitação (mesmo protocolo).
+
+## Campanhas: detalhamento automático por peça envolvida
+
+Nos tipos "Campanha sazonal" e "Campanha de vendas", ao marcar uma ou mais
+opções em "Peças envolvidas" (Post redes sociais, Impresso, Material para
+site, Wallpaper, E-mail marketing, Outro), um bloco de detalhamento aparece
+automaticamente logo abaixo para cada peça marcada — por exemplo, "Impresso"
+pede a dimensão da peça, e "Post redes sociais" pede rede(s) social(is) e
+formato(s), igual ao tipo de demanda dedicado. Desmarcar a peça esconde o
+bloco e ele deixa de ser obrigatório.
+
 ## Extender para novos tipos de demanda
 
-Os campos de cada tipo ficam centralizados em `SCHEMAS` no início de `app.js`.
-Para adicionar ou ajustar campos de um tipo existente (ou criar um tipo novo),
-edite esse objeto — o restante do formulário (navegação, validação, resumo,
-envio) é genérico e não precisa mudar.
+Os campos de cada tipo ficam centralizados em `SCHEMAS` no início de `app.js`
+(replicado em `elementor-widget.html`, que empacota o mesmo código num único
+bloco). Para adicionar ou ajustar campos de um tipo existente, edite esse
+objeto — o restante do formulário (navegação, validação, resumo, envio) é
+genérico e não precisa mudar. Redes sociais (múltiplos criativos) e campanhas
+(detalhamento por peça) têm sua própria lógica dedicada, em `REDES_SOCIAIS_FIELDS`
+e `PECA_DETAIL_FIELDS`/`PECAS_OPTIONS`, pelo mesmo motivo.
 
 ## Limitações conhecidas / próximos passos possíveis
 
 - Upload de arquivo é convertido em base64 no navegador antes de enviar — ótimo até uns 8MB por arquivo (configurável em `config.js`), mas para vídeos grandes o formulário já orienta o uso de link em vez de upload.
 - A coluna "Status" é atualizada manualmente pelo time na planilha. Se no futuro quiser um painel visual (Kanban) ligado a essa mesma planilha, dá para evoluir sem mexer no formulário.
+- O número sequencial do protocolo é baseado na quantidade de linhas já gravadas no mês — como uma solicitação com vários criativos/peças gera várias linhas, os números podem "pular" (ex: `0001`, depois `0005` se a anterior tinha 3 itens). Continuam únicos e em ordem crescente, só não contam exatamente "1 por solicitação".
 - Não há autenticação no envio do formulário (assim como no Tally). Se for necessário restringir a solicitantes internos, dá para adicionar validação de domínio de e-mail no `Code.gs`.
