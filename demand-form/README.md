@@ -10,12 +10,15 @@ Google Apps Script.
 
 ```
 demand-form/
-  index.html        estrutura das 5 etapas do formulário
-  style.css          visual (troque as variáveis de cor em :root para a marca)
-  config.js           URL do backend e limite de tamanho de arquivo
-  app.js              lógica de etapas, campos dinâmicos por tipo de demanda e envio
-  apps-script/Code.gs  backend: grava na planilha, sobe arquivos no Drive, envia e-mail
+  index.html            estrutura das 5 etapas do formulário
+  style.css              visual (troque as variáveis de cor em :root para a marca)
+  config.js               URL do backend e limite de tamanho de arquivo
+  app.js                  lógica de etapas, campos dinâmicos por tipo de demanda e envio
+  apps-script/Code.gs      backend: grava na planilha, sobe arquivos no Drive, envia e-mail
+  elementor-widget.html    tudo acima combinado num único bloco, pronto para colar no widget "HTML" do Elementor Pro
 ```
+
+`index.html` + `style.css` + `config.js` + `app.js` servem para hospedar o formulário como página própria (ou embutir via `<iframe>`). `elementor-widget.html` é a versão para colar direto no Elementor — veja a seção abaixo.
 
 ## Como publicar
 
@@ -40,6 +43,29 @@ demand-form/
 Sem `SCRIPT_URL` configurada, o formulário funciona em modo de simulação: valida
 e mostra a tela de sucesso, mas só loga o payload no console — útil para testar
 localmente antes de publicar o Apps Script.
+
+### 3. Publicar no widget HTML do Elementor Pro
+
+O widget "HTML" do Elementor aceita só um bloco de código (não arquivos
+separados), então use `elementor-widget.html` em vez dos arquivos soltos:
+
+1. Complete o passo 1 (planilha + Apps Script) e copie a URL do Web App.
+2. Abra `demand-form/elementor-widget.html`, ache a linha `SCRIPT_URL: ""`
+   dentro do `<script>` (perto do topo) e cole a URL ali.
+3. No Elementor, arraste o widget **HTML** para a página.
+4. Copie **todo** o conteúdo do arquivo (o comentário, o `<div id="sd-demand-form">`,
+   o `<style>` e o `<script>`) e cole no campo do widget.
+5. Clique em **Atualizar/Publicar** e visite a página publicada (não só o preview
+   do editor) para testar o envio de ponta a ponta.
+
+Detalhes importantes dessa versão:
+- O CSS é todo prefixado com `#sd-demand-form` para não vazar estilo para o
+  resto do tema e não ser sobrescrito por ele — pode colar em qualquer página,
+  mesmo com Elementor/WordPress carregando seus próprios estilos globais.
+- Use o widget **uma única vez por página** — os IDs internos (`demand-form`,
+  `btn-next` etc.) não foram feitos para duas instâncias na mesma página.
+- Para trocar as cores da marca, edite as variáveis no topo do bloco `<style>`
+  (`--sd-brand`, `--sd-brand-accent` etc.).
 
 ## Estrutura da planilha (aba "Demandas")
 

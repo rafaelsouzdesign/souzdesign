@@ -240,6 +240,16 @@
     if (step === 5) {
       renderReview();
     }
+    syncChoiceCardStyles();
+  }
+
+  // Reforço visual além do :has() em CSS — alguns temas/plugins de WordPress
+  // carregam navegadores ou motores de renderização mais antigos no editor.
+  function syncChoiceCardStyles() {
+    form.querySelectorAll(".choice-card").forEach((card) => {
+      const input = card.querySelector("input");
+      card.classList.toggle("is-checked", !!(input && input.checked));
+    });
   }
 
   function stepEl(step) {
@@ -446,6 +456,7 @@
       }
       selectedFiles = files;
     }
+    syncChoiceCardStyles();
   });
 
   document.getElementById("btn-new").addEventListener("click", () => {

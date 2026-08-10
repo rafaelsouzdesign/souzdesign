@@ -1,0 +1,925 @@
+<!--
+  Briefing de Demanda Criativa — bloco único para o widget "HTML" do Elementor Pro.
+
+  Como usar:
+  1. No Elementor, adicione o widget "HTML" (categoria Geral/Pro) na página.
+  2. Cole TODO o conteúdo deste arquivo dentro do widget.
+  3. Publique e edite (Atualizar).
+  4. Antes de ir ao ar: gere a URL do Google Apps Script (veja o README.md
+     desta pasta) e cole em SCRIPT_URL logo no início do bloco <script> abaixo.
+  5. Use este widget uma única vez por página — os IDs internos não são
+     preparados para duas instâncias no mesmo carregamento de página.
+-->
+<div id="sd-demand-form">
+  <div class="form-shell">
+    <header class="form-header">
+      <h1 id="form-title">Briefing de Demanda Criativa</h1>
+      <p id="form-subtitle" class="form-subtitle">Preencha as informações abaixo para abrir uma solicitação para o time de design.</p>
+      <div class="progress-track">
+        <div id="progress-bar" class="progress-bar"></div>
+      </div>
+    </header>
+
+    <form id="demand-form" novalidate>
+
+      <!-- Etapa 1: Identificação -->
+      <section class="step" data-step="1">
+        <h2>Quem está solicitando?</h2>
+
+        <label class="field">
+          <span class="field-label">Qual o seu nome? <span class="req">*</span></span>
+          <input type="text" name="nome" placeholder="Nome e Sobrenome" required />
+        </label>
+
+        <fieldset class="field">
+          <legend class="field-label">Para qual empresa é a solicitação? <span class="req">*</span></legend>
+          <div class="choice-grid" data-name="empresa" data-type="radio">
+            <label class="choice-card">
+              <input type="radio" name="empresa" value="Grupo Softcomp" required />
+              <span>Grupo Softcomp</span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="empresa" value="Softcomp" />
+              <span>Softcomp</span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="empresa" value="Softdados" />
+              <span>Softdados</span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="empresa" value="SoftX" />
+              <span>SoftX</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <label class="field">
+          <span class="field-label">E-mail corporativo <span class="req">*</span></span>
+          <input type="email" name="email" placeholder="Insira seu e-mail" required />
+        </label>
+      </section>
+
+      <!-- Etapa 2: Tipo de demanda -->
+      <section class="step" data-step="2" hidden>
+        <h2>Qual o tipo de demanda?</h2>
+        <fieldset class="field">
+          <legend class="sr-only">Tipo de demanda</legend>
+          <div class="choice-grid" data-name="tipoDemanda" data-type="radio">
+            <label class="choice-card">
+              <input type="radio" name="tipoDemanda" value="redes_sociais" required />
+              <span>Post para redes sociais</span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="tipoDemanda" value="impresso" />
+              <span>Impresso</span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="tipoDemanda" value="site" />
+              <span>Material para site</span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="tipoDemanda" value="wallpaper" />
+              <span>Wallpaper</span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="tipoDemanda" value="campanha_sazonal" />
+              <span>Campanha sazonal</span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="tipoDemanda" value="campanha_vendas" />
+              <span>Campanha de vendas</span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="tipoDemanda" value="outro" />
+              <span>Outro</span>
+            </label>
+          </div>
+        </fieldset>
+      </section>
+
+      <!-- Etapa 3: Campos específicos do tipo escolhido (renderizada via JS) -->
+      <section class="step" data-step="3" hidden>
+        <h2 id="dynamic-step-title">Detalhes da demanda</h2>
+        <div id="dynamic-fields"></div>
+      </section>
+
+      <!-- Etapa 4: Prazo, prioridade, aprovação, anexos -->
+      <section class="step" data-step="4" hidden>
+        <h2>Prazo e aprovação</h2>
+
+        <label class="field">
+          <span class="field-label">Data de entrega desejada <span class="req">*</span></span>
+          <input type="date" name="prazoDesejado" required />
+        </label>
+
+        <fieldset class="field">
+          <legend class="field-label">Prioridade <span class="req">*</span></legend>
+          <div class="choice-grid three" data-name="prioridade" data-type="radio">
+            <label class="choice-card">
+              <input type="radio" name="prioridade" value="Normal" required />
+              <span>Normal <small>até 5 dias úteis</small></span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="prioridade" value="Prioritário" />
+              <span>Prioritário <small>até 2 dias úteis</small></span>
+            </label>
+            <label class="choice-card">
+              <input type="radio" name="prioridade" value="Urgente" />
+              <span>Urgente <small>mesmo dia, sujeito à fila</small></span>
+            </label>
+          </div>
+        </fieldset>
+
+        <label class="field">
+          <span class="field-label">Quem vai aprovar a peça final?</span>
+          <input type="text" name="aprovador" placeholder="Nome do responsável pela aprovação" />
+        </label>
+
+        <label class="field">
+          <span class="field-label">Arquivos de referência (logos, imagens, briefing em PDF etc.)</span>
+          <input type="file" name="arquivos" multiple accept="image/*,.pdf,.ai,.psd,.doc,.docx" />
+          <small class="hint">Pode anexar mais de um arquivo. Para vídeos grandes, prefira colar um link abaixo.</small>
+        </label>
+
+        <div class="field">
+          <span class="field-label">Links de referência (opcional)</span>
+          <input type="url" name="link1" placeholder="Link da referência" class="link-input" />
+          <input type="url" name="link2" placeholder="Link da referência 02" class="link-input" />
+          <input type="url" name="link3" placeholder="Link da referência 03" class="link-input" />
+        </div>
+
+        <label class="field">
+          <span class="field-label">Observações adicionais</span>
+          <textarea name="observacoes" rows="3" placeholder="Alguma informação extra que o time de design precise saber?"></textarea>
+        </label>
+      </section>
+
+      <!-- Etapa 5: Confirmação -->
+      <section class="step" data-step="5" hidden>
+        <h2>Confira antes de enviar</h2>
+        <div id="review-summary" class="review-summary"></div>
+      </section>
+
+      <div class="form-nav">
+        <button type="button" id="btn-back" class="btn btn-ghost" hidden>← Voltar</button>
+        <button type="button" id="btn-next" class="btn btn-primary">Avançar →</button>
+        <button type="submit" id="btn-submit" class="btn btn-primary" hidden>Enviar solicitação</button>
+      </div>
+    </form>
+
+    <div id="success-screen" class="success-screen" hidden>
+      <div class="success-icon">✓</div>
+      <h2>Solicitação enviada!</h2>
+      <p>Seu protocolo é:</p>
+      <div id="protocol-code" class="protocol-code"></div>
+      <p class="success-note">Você vai receber um e-mail de confirmação com esses dados. Guarde o protocolo para acompanhar o andamento.</p>
+      <button type="button" id="btn-new" class="btn btn-primary">Enviar outra solicitação</button>
+    </div>
+
+    <div id="error-banner" class="error-banner" hidden></div>
+  </div>
+</div>
+
+<style>
+  #sd-demand-form {
+    --sd-brand: #1a1a1a;
+    --sd-brand-accent: #2563eb;
+    --sd-bg: #f7f7f8;
+    --sd-surface: #ffffff;
+    --sd-border: #e2e2e6;
+    --sd-text: #1a1a1a;
+    --sd-text-muted: #6b7280;
+    --sd-danger: #dc2626;
+    --sd-success: #16a34a;
+    --sd-radius: 12px;
+
+    display: block;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--sd-text);
+    background: var(--sd-bg);
+    padding: 32px 16px;
+  }
+
+  #sd-demand-form, #sd-demand-form * { box-sizing: border-box; }
+
+  #sd-demand-form .form-shell {
+    max-width: 640px;
+    margin: 0 auto;
+    background: var(--sd-surface);
+    border-radius: var(--sd-radius);
+    border: 1px solid var(--sd-border);
+    padding: 32px;
+  }
+
+  #sd-demand-form .form-header h1 {
+    font-size: 1.6rem;
+    margin: 0 0 8px;
+    line-height: 1.25;
+  }
+
+  #sd-demand-form .form-subtitle {
+    color: var(--sd-text-muted);
+    margin: 0 0 20px;
+  }
+
+  #sd-demand-form .progress-track {
+    height: 6px;
+    background: var(--sd-border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  #sd-demand-form .progress-bar {
+    height: 100%;
+    width: 20%;
+    background: var(--sd-brand-accent);
+    transition: width 0.25s ease;
+  }
+
+  #sd-demand-form .step h2 {
+    font-size: 1.15rem;
+    margin: 24px 0 16px;
+  }
+
+  #sd-demand-form .field {
+    display: block;
+    margin-bottom: 18px;
+  }
+
+  #sd-demand-form .field-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+  }
+
+  #sd-demand-form .req { color: var(--sd-danger); }
+
+  #sd-demand-form input[type="text"],
+  #sd-demand-form input[type="email"],
+  #sd-demand-form input[type="url"],
+  #sd-demand-form input[type="date"],
+  #sd-demand-form input[type="number"],
+  #sd-demand-form input[type="file"],
+  #sd-demand-form select,
+  #sd-demand-form textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--sd-border);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    background: var(--sd-surface);
+    color: var(--sd-text);
+  }
+
+  #sd-demand-form textarea { resize: vertical; }
+
+  #sd-demand-form input:focus,
+  #sd-demand-form select:focus,
+  #sd-demand-form textarea:focus {
+    outline: none;
+    border-color: var(--sd-brand-accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  }
+
+  #sd-demand-form .link-input { margin-bottom: 8px; }
+
+  #sd-demand-form .hint {
+    display: block;
+    color: var(--sd-text-muted);
+    margin-top: 6px;
+    font-size: 0.82rem;
+  }
+
+  #sd-demand-form fieldset.field {
+    border: none;
+    padding: 0;
+    margin: 0 0 18px;
+  }
+
+  #sd-demand-form .choice-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  #sd-demand-form .choice-grid.three { grid-template-columns: repeat(3, 1fr); }
+
+  @media (max-width: 480px) {
+    #sd-demand-form .choice-grid,
+    #sd-demand-form .choice-grid.three { grid-template-columns: 1fr; }
+  }
+
+  #sd-demand-form .choice-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--sd-border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    font-size: 0.92rem;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  #sd-demand-form .choice-card small {
+    display: block;
+    color: var(--sd-text-muted);
+    font-weight: 400;
+  }
+
+  #sd-demand-form .choice-card:has(input:checked),
+  #sd-demand-form .choice-card.is-checked {
+    border-color: var(--sd-brand-accent);
+    background: rgba(37, 99, 235, 0.06);
+  }
+
+  #sd-demand-form .choice-card input { accent-color: var(--sd-brand-accent); }
+
+  #sd-demand-form .card-block {
+    border: 1px dashed var(--sd-border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+
+  #sd-demand-form .card-block h3 {
+    margin: 0 0 10px;
+    font-size: 0.9rem;
+    color: var(--sd-text-muted);
+  }
+
+  #sd-demand-form .form-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 28px;
+  }
+
+  #sd-demand-form .btn {
+    border: none;
+    border-radius: 10px;
+    padding: 12px 22px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  #sd-demand-form .btn-primary {
+    background: var(--sd-brand);
+    color: #fff;
+    margin-left: auto;
+  }
+
+  #sd-demand-form .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  #sd-demand-form .btn-ghost {
+    background: transparent;
+    color: var(--sd-text-muted);
+  }
+
+  #sd-demand-form .review-summary dl {
+    display: grid;
+    grid-template-columns: 40% 60%;
+    row-gap: 10px;
+  }
+
+  #sd-demand-form .review-summary dt { color: var(--sd-text-muted); font-size: 0.85rem; }
+  #sd-demand-form .review-summary dd { margin: 0; font-size: 0.92rem; }
+
+  #sd-demand-form .success-screen {
+    max-width: 640px;
+    margin: 0 auto;
+    background: var(--sd-surface);
+    border-radius: var(--sd-radius);
+    border: 1px solid var(--sd-border);
+    padding: 48px 32px;
+    text-align: center;
+  }
+
+  #sd-demand-form .success-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--sd-success);
+    color: #fff;
+    font-size: 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+  }
+
+  #sd-demand-form .protocol-code {
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    background: var(--sd-bg);
+    border-radius: 8px;
+    padding: 10px 16px;
+    display: inline-block;
+    margin: 8px 0 16px;
+  }
+
+  #sd-demand-form .success-note {
+    color: var(--sd-text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+  }
+
+  #sd-demand-form .error-banner {
+    max-width: 640px;
+    margin: 16px auto 0;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: var(--sd-danger);
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+  }
+
+  #sd-demand-form .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+  }
+</style>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---- Configuração ---------------------------------------------------
+  // Cole aqui a URL do Web App do Google Apps Script (veja README.md).
+  // Enquanto ficar vazia, o formulário roda em modo de simulação.
+  var FORM_CONFIG = {
+    SCRIPT_URL: "",
+    MAX_FILE_SIZE_MB: 8,
+  };
+  // -----------------------------------------------------------------------
+
+  function campaignSchema() {
+    return {
+      title: "Detalhes da campanha",
+      fields: [
+        { id: "nomeCampanha", label: "Nome da campanha", type: "text", required: true },
+        { id: "pecasEnvolvidas", label: "Peças envolvidas", type: "checkbox", required: true,
+          options: ["Post redes sociais", "Impresso", "Material para site", "Wallpaper", "E-mail marketing", "Outro"] },
+        { id: "canais", label: "Canais de veiculação", type: "checkbox", required: true,
+          options: ["Instagram", "LinkedIn", "TikTok", "WhatsApp", "E-mail", "Site", "Impresso"] },
+        { id: "dataInicio", label: "Data de início da veiculação", type: "date", required: true },
+        { id: "dataFim", label: "Data de fim da veiculação", type: "date", required: false },
+        { id: "orcamentoMidia", label: "Orçamento de mídia (se houver)", type: "text", required: false },
+        { id: "briefingGeral", label: "Briefing geral da campanha", type: "textarea", required: true },
+      ],
+    };
+  }
+
+  const SCHEMAS = {
+    redes_sociais: {
+      title: "Detalhes do post para redes sociais",
+      fields: [
+        { id: "redeSocial", label: "Qual(is) rede(s) social(is)?", type: "checkbox", required: true,
+          options: ["Instagram", "LinkedIn", "TikTok", "WhatsApp"] },
+        { id: "formato", label: "Qual(is) formato(s)?", type: "checkbox", required: true,
+          options: ["Feed (1350x1080p)", "Story (1920x1080p)", "Carrossel", "Reels/Vídeo"] },
+        { id: "objetivo", label: "Qual o objetivo do post?", type: "radio", required: true,
+          options: ["Informar", "Vender", "Promover", "Engajar", "Comemorar", "Parabenizar", "Outro"] },
+        { id: "tituloPrincipal", label: "Título principal", type: "text", required: true },
+        { id: "copy", label: "Qual o texto (copy) definido?", type: "textarea", required: true },
+      ],
+    },
+    impresso: {
+      title: "Detalhes do material impresso",
+      fields: [
+        { id: "pecaImpressa", label: "Qual peça?", type: "select", required: true,
+          options: ["Cartão de visita", "Banner", "Flyer/Panfleto", "Adesivo", "Folder", "Outro"] },
+        { id: "tamanhoFinal", label: "Tamanho final (ex: 10x15cm)", type: "text", required: true },
+        { id: "quantidade", label: "Quantidade", type: "number", required: true },
+        { id: "acabamento", label: "Acabamento (laminação, verniz etc.)", type: "text", required: false },
+        { id: "localImpressao", label: "Local de impressão", type: "select", required: false,
+          options: ["Gráfica interna", "Gráfica terceirizada", "Não sei"] },
+        { id: "textoConteudo", label: "Texto/conteúdo da peça", type: "textarea", required: true },
+      ],
+    },
+    site: {
+      title: "Detalhes do material para site",
+      fields: [
+        { id: "paginaSecao", label: "Página/seção do site", type: "text", required: true },
+        { id: "dispositivo", label: "Dispositivo(s) alvo", type: "checkbox", required: true,
+          options: ["Desktop", "Mobile"] },
+        { id: "temDev", label: "Já existe um desenvolvedor envolvido nessa demanda?", type: "radio", required: true,
+          options: ["Sim", "Não"] },
+        { id: "descricaoMaterial", label: "Descreva o material necessário", type: "textarea", required: true },
+      ],
+    },
+    wallpaper: {
+      title: "Detalhes do wallpaper",
+      fields: [
+        { id: "dispositivoAlvo", label: "Dispositivo(s) alvo", type: "checkbox", required: true,
+          options: ["Notebook", "Monitor externo", "Celular", "Tablet"] },
+        { id: "resolucaoTela", label: "Resolução da tela (se souber)", type: "text", required: false },
+        { id: "temaConceito", label: "Tema/conceito desejado", type: "textarea", required: true },
+      ],
+    },
+    campanha_sazonal: campaignSchema(),
+    campanha_vendas: campaignSchema(),
+    outro: {
+      title: "Descreva a demanda",
+      fields: [
+        { id: "descricaoLivre", label: "Descreva detalhadamente a demanda", type: "textarea", required: true },
+      ],
+    },
+  };
+
+  const TIPO_LABELS = {
+    redes_sociais: "Post para redes sociais",
+    impresso: "Impresso",
+    site: "Material para site",
+    wallpaper: "Wallpaper",
+    campanha_sazonal: "Campanha sazonal",
+    campanha_vendas: "Campanha de vendas",
+    outro: "Outro",
+  };
+
+  const MAX_STEP = 5;
+  let currentStep = 1;
+  let selectedFiles = [];
+
+  const root = document.getElementById("sd-demand-form");
+  const form = root.querySelector("#demand-form");
+  const dynamicFieldsEl = root.querySelector("#dynamic-fields");
+  const dynamicTitleEl = root.querySelector("#dynamic-step-title");
+  const progressBar = root.querySelector("#progress-bar");
+  const btnBack = root.querySelector("#btn-back");
+  const btnNext = root.querySelector("#btn-next");
+  const btnSubmit = root.querySelector("#btn-submit");
+  const errorBanner = root.querySelector("#error-banner");
+  const successScreen = root.querySelector("#success-screen");
+
+  function showError(message) {
+    errorBanner.textContent = message;
+    errorBanner.hidden = false;
+    errorBanner.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  function clearError() {
+    errorBanner.hidden = true;
+    errorBanner.textContent = "";
+  }
+
+  function fieldHtml(field) {
+    const reqMark = field.required ? '<span class="req">*</span>' : "";
+    if (field.type === "text" || field.type === "date" || field.type === "number") {
+      return `
+        <label class="field">
+          <span class="field-label">${field.label} ${reqMark}</span>
+          <input type="${field.type}" name="${field.id}" ${field.required ? "required" : ""} />
+        </label>`;
+    }
+    if (field.type === "textarea") {
+      return `
+        <label class="field">
+          <span class="field-label">${field.label} ${reqMark}</span>
+          <textarea name="${field.id}" rows="4" ${field.required ? "required" : ""}></textarea>
+        </label>`;
+    }
+    if (field.type === "select") {
+      const opts = field.options.map((o) => `<option value="${o}">${o}</option>`).join("");
+      return `
+        <label class="field">
+          <span class="field-label">${field.label} ${reqMark}</span>
+          <select name="${field.id}" ${field.required ? "required" : ""}>
+            <option value="" disabled selected>Selecione</option>
+            ${opts}
+          </select>
+        </label>`;
+    }
+    if (field.type === "radio") {
+      const opts = field.options
+        .map(
+          (o) => `
+        <label class="choice-card">
+          <input type="radio" name="${field.id}" value="${o}" ${field.required ? "required" : ""} />
+          <span>${o}</span>
+        </label>`
+        )
+        .join("");
+      return `
+        <fieldset class="field">
+          <legend class="field-label">${field.label} ${reqMark}</legend>
+          <div class="choice-grid" data-name="${field.id}" data-type="radio">${opts}</div>
+        </fieldset>`;
+    }
+    if (field.type === "checkbox") {
+      const opts = field.options
+        .map(
+          (o) => `
+        <label class="choice-card">
+          <input type="checkbox" name="${field.id}[]" value="${o}" />
+          <span>${o}</span>
+        </label>`
+        )
+        .join("");
+      return `
+        <fieldset class="field">
+          <legend class="field-label">${field.label} ${reqMark}</legend>
+          <div class="choice-grid" data-name="${field.id}" data-type="checkbox">${opts}</div>
+        </fieldset>`;
+    }
+    return "";
+  }
+
+  function carrosselCardsHtml() {
+    let html = '<div id="carrossel-cards" hidden><h3 class="field-label" style="margin-bottom:10px">Cards do carrossel</h3>';
+    for (let i = 1; i <= 6; i++) {
+      html += `
+        <div class="card-block">
+          <h3>Card 0${i}</h3>
+          <label class="field">
+            <span class="field-label">Título</span>
+            <input type="text" name="card${i}Titulo" />
+          </label>
+          <label class="field">
+            <span class="field-label">Subtítulo</span>
+            <textarea name="card${i}Subtitulo" rows="2"></textarea>
+          </label>
+        </div>`;
+    }
+    html += "</div>";
+    return html;
+  }
+
+  function renderDynamicFields(tipo) {
+    const schema = SCHEMAS[tipo];
+    if (!schema) {
+      dynamicFieldsEl.innerHTML = "";
+      return;
+    }
+    dynamicTitleEl.textContent = schema.title;
+    let html = schema.fields.map(fieldHtml).join("");
+    if (tipo === "redes_sociais") {
+      html += carrosselCardsHtml();
+    }
+    dynamicFieldsEl.innerHTML = html;
+
+    if (tipo === "redes_sociais") {
+      const formatoBoxes = dynamicFieldsEl.querySelectorAll('input[name="formato[]"]');
+      const cardsBlock = root.querySelector("#carrossel-cards");
+      const toggleCards = () => {
+        const hasCarrossel = Array.from(formatoBoxes).some((cb) => cb.checked && cb.value === "Carrossel");
+        cardsBlock.hidden = !hasCarrossel;
+      };
+      formatoBoxes.forEach((cb) => cb.addEventListener("change", toggleCards));
+    }
+  }
+
+  function goToStep(step) {
+    root.querySelectorAll(".step").forEach((el) => {
+      el.hidden = Number(el.dataset.step) !== step;
+    });
+    currentStep = step;
+    progressBar.style.width = `${(step / MAX_STEP) * 100}%`;
+    btnBack.hidden = step === 1;
+    btnNext.hidden = step === MAX_STEP;
+    btnSubmit.hidden = step !== MAX_STEP;
+    clearError();
+    root.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    if (step === 3) {
+      const tipo = form.querySelector('input[name="tipoDemanda"]:checked');
+      renderDynamicFields(tipo ? tipo.value : null);
+    }
+    if (step === 5) {
+      renderReview();
+    }
+    syncChoiceCardStyles();
+  }
+
+  // Reforço visual além do :has() em CSS — alguns temas/plugins de WordPress
+  // carregam navegadores ou motores de renderização mais antigos no editor.
+  function syncChoiceCardStyles() {
+    form.querySelectorAll(".choice-card").forEach((card) => {
+      const input = card.querySelector("input");
+      card.classList.toggle("is-checked", !!(input && input.checked));
+    });
+  }
+
+  function stepEl(step) {
+    return root.querySelector(`.step[data-step="${step}"]`);
+  }
+
+  function validateStep(step) {
+    const el = stepEl(step);
+    const requiredInputs = el.querySelectorAll("input[required], textarea[required], select[required]");
+    for (const input of requiredInputs) {
+      if (input.type === "radio") {
+        const group = el.querySelectorAll(`input[name="${input.name}"]`);
+        const checked = Array.from(group).some((r) => r.checked);
+        if (!checked) {
+          showError(`Preencha o campo obrigatório: "${labelFor(input)}"`);
+          return false;
+        }
+      } else if (!input.value || !input.value.trim()) {
+        showError(`Preencha o campo obrigatório: "${labelFor(input)}"`);
+        input.focus();
+        return false;
+      }
+    }
+    // grupos de checkbox marcados como obrigatórios via schema (etapa 3)
+    if (step === 3) {
+      const tipo = form.querySelector('input[name="tipoDemanda"]:checked');
+      const schema = tipo && SCHEMAS[tipo.value];
+      if (schema) {
+        for (const field of schema.fields) {
+          if (field.type === "checkbox" && field.required) {
+            const checked = el.querySelectorAll(`input[name="${field.id}[]"]:checked`);
+            if (checked.length === 0) {
+              showError(`Selecione ao menos uma opção em "${field.label}"`);
+              return false;
+            }
+          }
+        }
+      }
+    }
+    return true;
+  }
+
+  function labelFor(input) {
+    const wrapper = input.closest(".field");
+    const labelEl = wrapper && wrapper.querySelector(".field-label");
+    return labelEl ? labelEl.textContent.replace("*", "").trim() : input.name;
+  }
+
+  function renderReview() {
+    const data = collectAllData();
+    const rows = [
+      ["Nome", data.nome],
+      ["Empresa", data.empresa],
+      ["E-mail", data.email],
+      ["Tipo de demanda", TIPO_LABELS[data.tipoDemanda] || data.tipoDemanda],
+      ["Prazo desejado", data.prazoDesejado],
+      ["Prioridade", data.prioridade],
+      ["Aprovador", data.aprovador || "—"],
+      ["Arquivos anexados", selectedFiles.length ? `${selectedFiles.length} arquivo(s)` : "Nenhum"],
+    ];
+    const dl = rows
+      .map(([k, v]) => `<dt>${k}</dt><dd>${v || "—"}</dd>`)
+      .join("");
+    root.querySelector("#review-summary").innerHTML = `<dl>${dl}</dl>`;
+  }
+
+  function collectAllData() {
+    const formData = new FormData(form);
+    const data = {};
+    for (const [key, value] of formData.entries()) {
+      if (key.endsWith("[]")) {
+        const cleanKey = key.slice(0, -2);
+        if (!data[cleanKey]) data[cleanKey] = [];
+        data[cleanKey].push(value);
+      } else {
+        data[key] = value;
+      }
+    }
+    return data;
+  }
+
+  function buildCamposEspecificos(tipo, data) {
+    const schema = SCHEMAS[tipo];
+    const out = {};
+    if (!schema) return out;
+    for (const field of schema.fields) {
+      out[field.id] = data[field.id] || (field.type === "checkbox" ? [] : "");
+    }
+    if (tipo === "redes_sociais") {
+      const cards = [];
+      for (let i = 1; i <= 6; i++) {
+        const titulo = data[`card${i}Titulo`];
+        const subtitulo = data[`card${i}Subtitulo`];
+        if (titulo || subtitulo) cards.push({ titulo: titulo || "", subtitulo: subtitulo || "" });
+      }
+      if (cards.length) out.cardsCarrossel = cards;
+    }
+    return out;
+  }
+
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(",")[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function buildPayload() {
+    const data = collectAllData();
+    const links = [data.link1, data.link2, data.link3].filter(Boolean);
+    const arquivos = await Promise.all(
+      selectedFiles.map(async (file) => ({
+        filename: file.name,
+        mimeType: file.type || "application/octet-stream",
+        base64: await fileToBase64(file),
+      }))
+    );
+    return {
+      nome: data.nome,
+      empresa: data.empresa,
+      email: data.email,
+      tipoDemanda: data.tipoDemanda,
+      tipoDemandaLabel: TIPO_LABELS[data.tipoDemanda] || data.tipoDemanda,
+      camposEspecificos: buildCamposEspecificos(data.tipoDemanda, data),
+      prazoDesejado: data.prazoDesejado,
+      prioridade: data.prioridade,
+      aprovador: data.aprovador || "",
+      links,
+      observacoes: data.observacoes || "",
+      arquivos,
+    };
+  }
+
+  function showSuccess(protocolo) {
+    form.hidden = true;
+    successScreen.hidden = false;
+    root.querySelector("#protocol-code").textContent = protocolo;
+  }
+
+  async function submitForm() {
+    btnSubmit.disabled = true;
+    btnSubmit.textContent = "Enviando...";
+    clearError();
+    try {
+      const payload = await buildPayload();
+
+      if (!FORM_CONFIG.SCRIPT_URL) {
+        console.log("[demand-form] SCRIPT_URL não configurado — simulando envio.", payload);
+        await new Promise((r) => setTimeout(r, 600));
+        showSuccess("SC-DEV-0000");
+        return;
+      }
+
+      const res = await fetch(FORM_CONFIG.SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json();
+      if (json.ok) {
+        showSuccess(json.protocolo);
+      } else {
+        showError(json.error || "Não foi possível enviar sua solicitação. Tente novamente.");
+      }
+    } catch (err) {
+      console.error(err);
+      showError("Não foi possível enviar sua solicitação. Verifique sua conexão e tente novamente.");
+    } finally {
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = "Enviar solicitação";
+    }
+  }
+
+  // Navegação
+  btnNext.addEventListener("click", () => {
+    if (!validateStep(currentStep)) return;
+    goToStep(Math.min(currentStep + 1, MAX_STEP));
+  });
+
+  btnBack.addEventListener("click", () => {
+    goToStep(Math.max(currentStep - 1, 1));
+  });
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!validateStep(currentStep)) return;
+    submitForm();
+  });
+
+  form.addEventListener("change", (e) => {
+    if (e.target.name === "arquivos") {
+      const maxBytes = (FORM_CONFIG.MAX_FILE_SIZE_MB || 8) * 1024 * 1024;
+      const files = Array.from(e.target.files);
+      const tooBig = files.filter((f) => f.size > maxBytes);
+      if (tooBig.length) {
+        showError(
+          `${tooBig.map((f) => f.name).join(", ")} excede ${FORM_CONFIG.MAX_FILE_SIZE_MB}MB. Use um link de referência em vez de upload para esse arquivo.`
+        );
+        e.target.value = "";
+        selectedFiles = [];
+        return;
+      }
+      selectedFiles = files;
+    }
+    syncChoiceCardStyles();
+  });
+
+  root.querySelector("#btn-new").addEventListener("click", () => {
+    window.location.reload();
+  });
+
+  goToStep(1);
+})();
+</script>

@@ -144,7 +144,8 @@ fieldset.field {
   font-weight: 400;
 }
 
-.choice-card:has(input:checked) {
+.choice-card:has(input:checked),
+.choice-card.is-checked {
   border-color: var(--brand-accent);
   background: rgba(37, 99, 235, 0.06);
 }
