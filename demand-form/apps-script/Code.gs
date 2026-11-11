@@ -16,10 +16,8 @@
  */
 
 const CONFIG = {
-  // ID da pasta do Google Drive onde os anexos serão salvos — não é a planilha!
-  // Crie uma pasta em drive.google.com, abra-a e copie o trecho final da URL:
-  // https://drive.google.com/drive/folders/ESTE_TRECHO_AQUI_E_O_ID
-  DRIVE_FOLDER_ID: "COLE_AQUI_O_ID_DA_PASTA_DO_DRIVE",
+  // ID da pasta do Google Drive onde os anexos serão salvos.
+  DRIVE_FOLDER_ID: "1Y_MsjnmYof36bM2-c1EY5uRHUEsYoLF_",
   PROTOCOL_PREFIX: "SC",
   // E-mail(s) que recebem uma cópia completa de toda demanda recebida (separados por vírgula).
   NOTIFY_TEAM_EMAILS: "rafael@souzdesign.com.br",
